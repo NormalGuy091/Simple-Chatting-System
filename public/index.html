@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>💬 Simple Chat</h1>
+
+        <div class="room-controls">
+            <input id="room" placeholder="Room name">
+            <button id="create">Create Room</button>
+            <button id="join">Join Room</button>
+        </div>
+
+        <p id="status">Not in a room</p>
+
+        <div id="chat">
+            <div id="messages"></div>
+
+            <div id="form">
+                <input id="message" placeholder="Type a message..." autocomplete="off">
+                <button type="submit" id="submitbtn" onclick="sendMsg()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script >
+        const socket = io()
+
+const currentRoom = document.getElementById('room')
+const roomStatus = document.getElementById('status')
+const messageInput = document.getElementById('message')
+const form = document.getElementById('form')
+const messages = document.getElementById('messages')
+
+document.getElementById('create').onclick = () => {
+    socket.emit('create-room', currentRoom.value)
+}
+
+document.getElementById('join').onclick = () => {
+    socket.emit('join-room', currentRoom.value)
+}
+
+function sendMsg() {
+    socket.emit('chat-message', messageInput.value)
+    messageInput.value = ''
+}
+socket.on('chat-message', (msg) => {
+    const message = document.createElement('div')
+    message.textContent = msg
+    messages.appendChild(message)
+})
+
+socket.on('room-created', (room) => {
+    currentRoom.textContent = room
+    roomStatus.value = ''
+})
+
+socket.on('room-error', (errmsg) => {
+    alert(errmsg)
+})
+
+socket.on('joined-room', (room) => {
+    currentRoom.value = ''
+})
+    </script>
+</body>
+</html>
